@@ -28,7 +28,6 @@ adder_2bit(int64_t a, int64_t b, int8_t carry);
 // Program.
 // TODO
 //  * Make hardcode of int64_t to something more portable.
-//  * Make addition two's complement aware (?).
 int
 main(void)
 {
