@@ -22,7 +22,7 @@ typedef struct pair_t Pair;
 int64_t
 bin_add(int64_t x, int64_t y);
 
-Pair*
+Pair
 adder_2bit(int64_t a, int64_t b, int8_t carry);
 
 // Program.
@@ -38,6 +38,8 @@ main(void)
   , { 10, 5, 10+5 }
   , { 10, -5, 10+(-5) }
   , { -10, 5, (-10)+5 }
+  , { 0, 1, 1+0 } // Identity (right)
+  , { 1, 0, 0+1 } // Identity (left)
   , { LONG_MAX, LONG_MAX, LONG_MAX+LONG_MAX } // Overflow
   , { LONG_MAX, -LONG_MAX, LONG_MAX+(-LONG_MAX) } // Inverse
   , { -LONG_MAX, -1, (-LONG_MAX)+(-1) } // Underflow
@@ -56,36 +58,27 @@ main(void)
   }
 }
 
-Pair*
-pair(int64_t fst_val, int64_t snd_val)
-{
-  Pair* tup = malloc(sizeof(Pair));
-  assert(tup != NULL);
-
-  tup->fst = fst_val;
-  tup->snd = snd_val;
-  return tup;
-}
-
-Pair*
+Pair
 adder_2bit(int64_t a, int64_t b, int8_t carry)
 {
-  Pair* tup = pair(0, 0);
+  Pair tup;
 
+  // TODO
+  // * There's probably a way to do this in two lines with bit fiddling.
   if (a == 1 && b == 1)
   {
-    tup->fst = carry ? 1 : 0;
-    tup->snd = 1;
+    tup.fst = carry ? 1 : 0;
+    tup.snd = 1;
   }
   else if (a == 1 || b == 1)
   {
-    tup->fst = carry ? 0 : 1;
-    tup->snd = carry ? 1 : 0;
+    tup.fst = carry ? 0 : 1;
+    tup.snd = carry ? 1 : 0;
   }
   else
   {
-    tup->fst = carry ? 1 : 0;
-    tup->snd = 0;
+    tup.fst = carry ? 1 : 0;
+    tup.snd = 0;
   }
 
   return tup;
@@ -101,12 +94,10 @@ bin_add(int64_t x, int64_t y)
     int64_t a = (x >> i) & 1;
     int64_t b = (y >> i) & 1;
 
-    Pair* tup = adder_2bit(a, b, carry);
+    Pair tup = adder_2bit(a, b, carry);
 
-    rv |= (tup->fst << i);
-    carry = tup->snd;
-
-    free(tup);
+    rv |= (tup.fst << i);
+    carry = tup.snd;
   }
 
   return rv;
