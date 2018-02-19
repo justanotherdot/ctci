@@ -51,7 +51,11 @@ func huffman(s string) string {
 
 	if !allOnes {
 		for _, p := range ps {
-			rv += fmt.Sprintf("%c%d", p.rune, p.count)
+			if p.count == 1 {
+				rv += fmt.Sprintf("%c", p.rune)
+			} else {
+				rv += fmt.Sprintf("%c%d", p.rune, p.count)
+			}
 		}
 	} else {
 		rv = s
