@@ -127,11 +127,11 @@ swap4(pixel* a, pixel* b, pixel* c, pixel* d)
 }
 
 // N.B.
-// The dirty white lie we tell ourselves is that this inplace sort does not use
-// 'any extra memory' but the reality is that we'll always need at least one
-// extra cell element to stash away the temporary value. On extremely memory
-// constrained systems (e.g. embedded contexts) another alternative needs to be
-// taken, such as bit fiddling approaches involving XOR swaps.
+// The dirty white lie we tell ourselves is that this inplace rotation does not
+// use 'any extra memory' but the reality is that we'll always need at least
+// one extra cell element to stash away the temporary value. On extremely
+// memory constrained systems (e.g. embedded contexts) another alternative
+// needs to be taken, such as bit fiddling approaches involving XOR swaps.
 void
 rot90_in_place(SquareMatrix m)
 {
