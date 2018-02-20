@@ -135,6 +135,11 @@ swap4(pixel* a, pixel* b, pixel* c, pixel* d)
 void
 rot90_in_place(SquareMatrix m)
 {
+  if (m.size < 2)
+  {
+    return;
+  }
+
   for (size_t i = 0; i < m.size/2; ++i)
   {
     for (size_t j = i; j < (m.size-1)-i; ++j)
