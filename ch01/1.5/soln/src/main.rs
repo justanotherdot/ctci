@@ -1,3 +1,5 @@
+use std::cmp;
+
 #[derive(Debug, PartialEq)]
 enum EditType {
     Replace,
@@ -12,71 +14,70 @@ enum EditDistanceType {
     PluralDiff,
 }
 
-fn diff_count(s: String, t: String, slen: usize, tlen: usize) -> i64 {
-    let max_string;
-    let min_string;
-    if slen > tlen {
-        max_string = s;
-        min_string = t;
+fn lev_distance(s: &String, t: &String, i: usize, j: usize) -> usize {
+    if cmp::min(i, j) == 0 {
+        return cmp::max(i, j);
     } else {
-        max_string = t;
-        min_string = s;
-    }
+        let indicator;
+        if s.get((i-1)..i) == t.get((j-1)..j) {
+            indicator = 0;
+        } else {
+            indicator = 1;
+        }
+        let a = lev_distance(s, t, i-1, j)+1; // Deletion.
+        let b = lev_distance(s, t, i, j-1)+1; // Insertion.
+        let c = lev_distance(s, t, i-1, j-1)+indicator; // Replacement or same.
 
-    let mut diff_count = 0;
-    for (i, c0) in max_string.chars().enumerate() {
-        let rc1 = min_string.get(i..(i+1));
-        match rc1 {
-            Some(c1) => {
-                if c0.to_string() != c1 {
-                    diff_count += 1;
-                }
-            }
-            None => {
-                diff_count += 1;
-            }
+        // Alternative, heavy-duty way compare three-way min is to bring in something like a
+        // BTreeSet, do the insertions, and then pull out the element from an iterator.
+        // e.g.
+        //
+        // use std::collections::BTreeSet;
+        //
+        // let mut set = BTreeSet::new();
+        // set.insert(a);
+        // set.insert(b);
+        // set.insert(c);
+        // let min = set.iter().next().unwrap();
+        // return min;
+        //
+        if a >= b && a >= c {
+            return cmp::min(b, c);
+        } else if b >= a && b >= c {
+            return cmp:: min(a, c);
+        } else {
+            return cmp:: min(a, b);
         }
     }
-    return diff_count;
 }
 
 fn cmp(s: String, t: String) -> EditDistanceType {
     let slen = s.chars().count();
     let tlen = t.chars().count();
-    if slen == tlen {
-        if s == t {
-            return EditDistanceType::SameStr;
+    let diff_count = lev_distance(&s, &t, slen, tlen);
+
+    if diff_count == 0 {
+        return EditDistanceType::SameStr;
+    } else if slen == tlen && diff_count == 1 {
+        return EditDistanceType::SingularDiff(EditType::Replace);
+    } else if diff_count == 1 {
+        if slen > tlen {
+            return EditDistanceType::SingularDiff(EditType::Delete);
         } else {
-            let diff_count = diff_count(s, t, slen, tlen);
-            if diff_count == 1 {
-                return EditDistanceType::SingularDiff(EditType::Replace);
-            } else {
-                return EditDistanceType::PluralDiff;
-            }
+            return EditDistanceType::SingularDiff(EditType::Insert);
         }
     } else {
-        let len_delta;
-        if slen > tlen {
-            len_delta = slen - tlen;
-        } else {
-            len_delta = tlen - slen;
-        }
-
-        let dcount = diff_count(s, t, slen, tlen);
-        if len_delta == 1 && dcount == 1 {
-            if slen > tlen {
-                return EditDistanceType::SingularDiff(EditType::Delete)
-            } else {
-                return EditDistanceType::SingularDiff(EditType::Insert)
-            }
-        } else {
-            return EditDistanceType::PluralDiff;
-        }
+        return EditDistanceType::PluralDiff;
     }
 }
 
 fn main() {
     let examples = vec![
+        (
+            "kitten".to_string(),
+            "sitting".to_string(),
+            EditDistanceType::PluralDiff
+        ),
         (
             "hello".to_string(),
             "goodbye".to_string(),
@@ -131,7 +132,7 @@ fn main() {
 
     for &(ref e0, ref e1, ref exp) in examples.iter() {
         let rv = cmp(e0.to_string(), e1.to_string());
-        println!("Examples: '{}', '{}'. result `{:?}'", e0, e1, rv);
+        println!("Examples: '{}', '{}'. result `{:?}' vs. expected `{:?}'", e0, e1, rv, exp);
         assert!(rv == *exp);
     }
 }
