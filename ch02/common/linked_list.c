@@ -60,6 +60,26 @@ new_node(void* payload)
 }
 
 void
+delete_node(Node** head, Node* node)
+{
+  // Linus Torvalds 'double ptr trick'
+  // Fabulous at parties.
+  Node** curr = head;
+  Node* runner = *head;
+  while (runner != NULL)
+  {
+    if (runner == node)
+    {
+      *curr = runner->next;
+      return;
+    }
+
+    curr = &runner->next;
+    runner = runner->next;
+  }
+}
+
+void
 print_as_int_list(Node* head)
 {
   // FIXME
@@ -82,4 +102,16 @@ print_as_int_list(Node* head)
     curr = curr->next;
   }
   printf("]\n");
+}
+
+void
+free_list(Node* head)
+{
+  Node* curr = head;
+  while (curr != NULL)
+  {
+    Node* to_free = curr;
+    curr = curr->next;
+    free(to_free);
+  }
 }

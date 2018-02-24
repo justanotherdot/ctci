@@ -22,6 +22,12 @@ Node*
 new_node(void* payload);
 
 void
-print_list(Node* head);
+delete_node(Node** head, Node* node);
+
+void
+print_as_int_list(Node* head);
+
+void
+free_list(Node* head);
 
 #endif
