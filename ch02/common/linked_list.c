@@ -129,6 +129,32 @@ print_as_char_list(Node* head)
   printf("]\n");
 }
 
+char*
+unsafe_cast_to_str(Node* head)
+{
+  // XXX
+  // Assumes that head is a collection of ascii chars!
+  size_t len = list_len(head);
+  char* s = malloc(sizeof(char)*len+1);
+  s[len-1] = '\0';
+
+  if (len <= 1)
+  {
+    return s;
+  }
+
+  Node* curr = head;
+  for (size_t i = 0; i < len; ++i)
+  {
+    char p = *(char*)curr->payload;
+    s[i] = p;
+    curr = curr->next;
+  }
+
+  return s;
+}
+
+
 void
 free_list(Node* head)
 {

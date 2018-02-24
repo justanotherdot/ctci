@@ -30,6 +30,9 @@ print_as_int_list(Node* head);
 void
 print_as_char_list(Node* head);
 
+char*
+unsafe_cast_to_str(Node* head);
+
 void
 free_list(Node* head);
 
