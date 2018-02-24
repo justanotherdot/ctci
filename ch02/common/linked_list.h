@@ -28,6 +28,9 @@ void
 print_as_int_list(Node* head);
 
 void
+print_as_char_list(Node* head);
+
+void
 free_list(Node* head);
 
 #endif

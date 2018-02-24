@@ -105,6 +105,31 @@ print_as_int_list(Node* head)
 }
 
 void
+print_as_char_list(Node* head)
+{
+  // FIXME
+  // Ideally we'd have a function that pretty prints a linked list and then
+  // just print that straightforwardly. This couples itself too tightly to the
+  // internals with effects. Conversely, implementing that is tricky: We need
+  // to use something like sprintf for each integer we print. And our list is
+  // generic, so which do we use to cast? That's actually another issue with
+  // this code; it will always cast whatever values we're storing to int.
+  Node* curr = head;
+  printf("[");
+  while (curr != NULL)
+  {
+    char* p = (char*)curr->payload;
+    printf("'%c'", *p);
+    if (curr->next != NULL)
+    {
+      printf(", ");
+    }
+    curr = curr->next;
+  }
+  printf("]\n");
+}
+
+void
 free_list(Node* head)
 {
   Node* curr = head;
