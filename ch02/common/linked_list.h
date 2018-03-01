@@ -36,4 +36,7 @@ unsafe_cast_to_str(Node* head);
 void
 free_list(Node* head);
 
+Node*
+clone_list(Node* head);
+
 #endif

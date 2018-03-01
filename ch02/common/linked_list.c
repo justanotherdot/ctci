@@ -53,6 +53,9 @@ Node*
 new_node(void* payload)
 {
   Node* n = malloc(sizeof(Node));
+
+  // TODO this means all payloads are shared.
+  // It would be ideal to make copies of the data.
   n->payload = payload;
   n->next = NULL;
 
@@ -165,4 +168,30 @@ free_list(Node* head)
     curr = curr->next;
     free(to_free);
   }
+}
+
+Node*
+clone_list(Node* head)
+{
+  Node* curr = head;
+  Node* n = NULL;
+  Node* h = NULL;
+  Node* prev = NULL;
+
+  while (curr != NULL)
+  {
+    n = new_node(curr->payload);
+    if (prev != NULL)
+    {
+      prev->next = n;
+    }
+    if (h == NULL)
+    {
+      h = n;
+    }
+    prev = n;
+    curr = curr->next;
+  }
+
+  return h;
 }
