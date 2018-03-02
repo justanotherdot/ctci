@@ -39,4 +39,7 @@ free_list(Node* head);
 Node*
 clone_list(Node* head);
 
+void
+reverse(Node** head);
+
 #endif

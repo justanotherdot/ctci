@@ -195,3 +195,33 @@ clone_list(Node* head)
 
   return h;
 }
+
+void
+reverse(Node** head)
+{
+  if (head == NULL)
+  {
+    return;
+  }
+
+  size_t len = list_len(*head);
+  // FIXME memory leak.
+  Node** ptrs = malloc(sizeof(Node*)*len+1);
+  ptrs[len] = NULL; // Avoid special case in linking step.
+  Node* curr = *head;
+
+  for (size_t i = 0; i < len; ++i)
+  {
+    ptrs[(len-1)-i] = curr;
+    curr = curr->next;
+  }
+
+  // Link inplace.
+  for (size_t i = 0; i < len; ++i)
+  {
+    ptrs[i]->next = ptrs[i+1];
+  }
+
+  *head = ptrs[0];
+  free(ptrs);
+}
