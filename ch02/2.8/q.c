@@ -68,6 +68,7 @@ main(void)
   printf("Original list: ");
   print_as_int_list(head0);
 
+  // Technically, a linked list with a cycle is corrupt.
   printf("Tying the knot ...\n");
   Node* curr = head0;
   Node* knot = NULL;
