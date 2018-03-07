@@ -93,6 +93,15 @@ main(void)
     assert(*(int*)cycle_head->payload == *(int*)knot->payload);
   }
 
-  // TODO need a `free_list_with_cycle(list, head_of_cycle)'
-  //free_list(head0);
+  // Untie the knot so we can free the list.
+  while (knot != NULL)
+  {
+    if (knot->next == cycle_head)
+    {
+      knot->next = NULL;
+      break;
+    }
+    knot = knot->next;
+  }
+  free_list(head0);
 }
