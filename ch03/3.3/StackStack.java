@@ -29,7 +29,6 @@ public class StackStack<T> {
   public Optional<T> pop() {
     // Never get rid of last stack.
     if ((currStack.size()-1) == 0 && stacks.size() > 1) {
-      System.out.println("Removing stack num: " + (stacks.size()-1));
       int top = stacks.size() - 1;
       Optional<T> rv = currStack.pop();
       stacks.remove(top);
@@ -37,6 +36,14 @@ public class StackStack<T> {
       return rv;
     } else {
       return currStack.pop();
+    }
+  }
+
+  public Optional<T> popAt(int ix) {
+    if (ix < 0 || ix >= stacks.size()) {
+      return Optional.empty();
+    } else {
+      return stacks.get(ix).pop();
     }
   }
 
@@ -52,7 +59,6 @@ public class StackStack<T> {
     System.out.println();
   }
 
-  // Maybe best if we get the entire size of the stacks.
   public int size() {
     int rv = 0;
     for (Stack<T> s : stacks) {

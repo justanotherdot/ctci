@@ -9,6 +9,8 @@ public class q {
     for (int i = 0; i < 50; ++i) {
       ss.pop();
     }
+    ss.popAt(0);
+    ss.printSizes();
     System.out.println(ss.size());
   }
 }
