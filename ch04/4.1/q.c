@@ -30,6 +30,7 @@ void
 link(UnionFind* uf, int p, int q)
 {
   // So named because `union' is a keyword in C.
+
   int rootP = find(uf, p);
   int rootQ = find(uf, q);
   if (rootP == rootQ)
@@ -37,6 +38,7 @@ link(UnionFind* uf, int p, int q)
     return;
   }
 
+  // Always merge the smaller trees into the bigger ones root.
   if (uf->size[rootP] < uf->size[rootQ])
   {
     uf->parent[rootP] = rootQ;
@@ -62,6 +64,7 @@ find(UnionFind* uf, int p)
   while (p != root)
   {
     int newp = uf->parent[p];
+    // Flatten the path for this particular p.
     uf->parent[p] = root;
     p = newp;
   }
@@ -128,6 +131,12 @@ driver(int n)
   }
   printf("\n");
   printf("There are %d connected edges.\n", connected_count);
+  printf("There are %d components (disjoint sets).\n", uf.count);
+
+  // Cleanup.
+  free(uf.parent);
+  free(uf.size);
+  free(ps);
 }
 
 int
