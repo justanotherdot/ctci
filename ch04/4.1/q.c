@@ -100,12 +100,9 @@ random_pairs(int n)
   return ps;
 }
 
-int
-main(void)
+void
+driver(int n)
 {
-  srand(time(NULL));
-
-  int n = 4096;
   UnionFind uf = union_find(n);
   Pair* ps = random_pairs(n);
 
@@ -122,9 +119,21 @@ main(void)
   {
     bool connect = connected(&uf, ps[i].x, ps[i].y);
     connected_count += connect ? 1 : 0;
-    printf("%4d - %4d: %13s\n", ps[i].x, ps[i].y, connect ? "connected" : "NOT connected");
+    printf(
+        "%4d - %4d: %13s\n",
+        ps[i].x,
+        ps[i].y,
+        connect ? "connected" : "NOT connected"
+    );
   }
   printf("\n");
   printf("There are %d connected edges.\n", connected_count);
 }
 
+int
+main(void)
+{
+  srand(time(NULL));
+  int n = 4096;
+  driver(n);
+}
