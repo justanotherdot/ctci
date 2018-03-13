@@ -103,11 +103,11 @@ random_pairs(int n)
 int
 main(void)
 {
+  srand(time(NULL));
+
   int n = 4096;
   UnionFind uf = union_find(n);
   Pair* ps = random_pairs(n);
-
-  srand(time(NULL));
 
   for (int i = 0; i < n; ++i)
   {
