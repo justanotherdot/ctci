@@ -129,10 +129,12 @@ void free_tree(Tree* t)
     return;
   }
 
-  if (t->right == NULL && t->left == NULL) {
-    free(t);
-  } else {
-    tree_size(t->left);
-    tree_size(t->right);
-  }
+  free_tree(t->left);
+  free_tree(t->right);
+  printf("Freeing tnode for val %ld\n", t->val);
+  free(t);
+}
+
+void free_list(List xs) {
+  free(xs.arr);
 }

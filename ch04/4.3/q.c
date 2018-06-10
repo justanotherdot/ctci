@@ -23,4 +23,5 @@ int main(void)
   print_list(xs);
 
   free_tree(t);
+  free_list(xs);
 }

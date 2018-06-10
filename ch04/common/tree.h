@@ -40,4 +40,6 @@ void print_tree(Tree* t);
 
 void free_tree(Tree* t);
 
+void free_list(List xs);
+
 #endif
