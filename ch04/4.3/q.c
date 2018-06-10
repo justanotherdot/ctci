@@ -9,12 +9,12 @@
 #define TRUE 1
 
 Tree* example_tree() {
-  int arr01[] = { 1, 2, 3, 4, 5 };
+  int arr01[] = { 1, 2, 3, 4, 5, 6, 7 };
   Slice s01 = {
     .arr = arr01,
     .beg = 0,
-    .end = 4,
-    .size = 5,
+    .end = 6,
+    .size = 7,
   };
   return from_dist_asc_list(s01);
 }
@@ -23,7 +23,7 @@ Tree* example_tree() {
 
 // A dyanmically sized integer queue.
 struct int_queue_t {
-  int* arr;
+  void** arr;
   size_t size;
   size_t capacity;
   size_t front;
@@ -52,15 +52,15 @@ void resize_int_queue(IntQueue* iq, size_t new_size)
 
   if (iq->arr != NULL) {
     // XXX Could also malloc and memcpy.
-    int* tmp = iq->arr;
-    iq->arr = realloc(iq->arr, sizeof(int) * new_size);
+    void** tmp = iq->arr;
+    iq->arr = realloc(iq->arr, sizeof(void*) * new_size);
 
     if (iq->arr == NULL) {
       fprintf(stderr, "WARNING: Failed realloc in `resize_int_queue'\n");
       iq->arr = tmp;
     }
   } else {
-    iq->arr = malloc(sizeof(int) * new_size);
+    iq->arr = malloc(sizeof(void*) * new_size);
     assert(iq->arr != NULL);
   }
   iq->capacity = new_size;
@@ -95,9 +95,9 @@ void shrink_int_queue(IntQueue* iq)
   } else {
     // FIXME This should be generalised.
     // It should also more intelligently shrink in an amortised manner.
-    int* old = iq->arr;
+    void** old = iq->arr;
     size_t sz = iq->back - iq->front;
-    iq->arr = malloc(sizeof(int) * sz);
+    iq->arr = malloc(sizeof(void*) * sz);
     size_t j = iq->front;
     for (size_t i = 0; i < iq->back; ++i, ++j) {
       iq->arr[i] = old[j];
@@ -110,7 +110,7 @@ void shrink_int_queue(IntQueue* iq)
   }
 }
 
-void enqueue_int(int v, IntQueue* iq)
+void enqueue_int(void* v, IntQueue* iq)
 {
   grow_int_queue(iq);
   iq->arr[iq->back] = v;
@@ -120,7 +120,7 @@ void enqueue_int(int v, IntQueue* iq)
   }
 }
 
-int dequeue_int(IntQueue* iq)
+void* dequeue_int(IntQueue* iq)
 {
   assert(iq != NULL);
   assert(iq->arr != NULL);
@@ -129,7 +129,7 @@ int dequeue_int(IntQueue* iq)
 
   // XXX The following line makes this a stack!
   /*int rv = iq->arr[iq->size];*/
-  int rv = iq->arr[iq->front];
+  void* rv = iq->arr[iq->front];
   iq->front += 1;
   iq->size -= 1;
 
@@ -163,7 +163,8 @@ char* int_queue_array_to_string(IntQueue* iq, char debug) {
     }
 
     if (i >= iq->front && i < iq->back) {
-      sl += sprintf(str + sl, "%d", iq->arr[i]);
+      /*sl += sprintf(str + sl, "%d", iq->arr[i]);*/
+      sl += sprintf(str + sl, "OBJECT");
     } else {
       sl += sprintf(str + sl, "X");
     }
@@ -208,7 +209,7 @@ char is_empty_int_queue(IntQueue* iq)
   return iq->arr == NULL;
 }
 
-char is_member_of_int_queue(int needle, IntQueue* iq)
+char is_member_of_int_queue(void* needle, IntQueue* iq)
 {
   char rv = FALSE;
   for (size_t i = iq->front; i < iq->back; ++i) {
@@ -228,6 +229,7 @@ char is_member_of_int_queue(int needle, IntQueue* iq)
 // This also has a serious flow in that it assumes that all items of the tree
 // are unique, which should technically be true but may not be if the tree is
 // malformed.
+// FIXME Needs a queue that can queue up tree nodes.
 void tree_to_lists(Tree* t)
 {
   if (t == NULL) {
@@ -236,14 +238,21 @@ void tree_to_lists(Tree* t)
 
   IntQueue seen = empty_int_queue();
   IntQueue q = empty_int_queue();
-  enqueue_int(t->val, &q);
+  enqueue_int(t, &q);
 
   while (!is_empty_int_queue(&q)) {
-    int curr = dequeue_int(&q);
-    if (is_member_of_int_queue(curr, &q)) {
+    Tree* curr = dequeue_int(&q);
+    if (curr == NULL || is_member_of_int_queue(curr, &seen)) {
       continue;
     }
+    printf("%ld\n", curr->val);
     enqueue_int(curr, &seen);
+    if (curr->left != NULL) {
+      enqueue_int(curr->left, &q);
+    }
+    if (curr->right != NULL) {
+      enqueue_int(curr->right, &q);
+    }
   }
 }
 
@@ -251,8 +260,11 @@ int main(void)
 {
   Tree* t = example_tree();
 
+  // FIXME I believe to_list to be broken.
   List xs = to_list(t);
   print_list(xs);
+
+  tree_to_lists(t);
 
   free_tree(t);
   free_list(xs);
