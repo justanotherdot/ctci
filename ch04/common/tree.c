@@ -131,10 +131,10 @@ void free_tree(Tree* t)
 
   free_tree(t->left);
   free_tree(t->right);
-  printf("Freeing tnode for val %ld\n", t->val);
   free(t);
 }
 
-void free_list(List xs) {
+void free_list(List xs)
+{
   free(xs.arr);
 }
