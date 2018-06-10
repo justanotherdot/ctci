@@ -121,3 +121,18 @@ void print_tree(Tree* t)
   printf("%ld ", t->val);
   print_tree(t->right);
 }
+
+void free_tree(Tree* t)
+{
+  if (t == NULL)
+  {
+    return;
+  }
+
+  if (t->right == NULL && t->left == NULL) {
+    free(t);
+  } else {
+    tree_size(t->left);
+    tree_size(t->right);
+  }
+}

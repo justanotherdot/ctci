@@ -38,4 +38,6 @@ void print_list(List xs);
 
 void print_tree(Tree* t);
 
+void free_tree(Tree* t);
+
 #endif
