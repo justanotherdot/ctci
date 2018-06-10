@@ -4,6 +4,9 @@
 #include <assert.h>
 #include "tree.h"
 
+#define TRUE 1
+#define FALSE 0
+
 Tree* singleton(size_t val)
 {
   Tree* t = malloc(sizeof(Tree));
@@ -13,6 +16,7 @@ Tree* singleton(size_t val)
   return t;
 }
 
+// FIXME I believe to_list to be broken.
 Tree* from_dist_asc_list(Slice xs)
 {
   if (xs.size == 0)
@@ -34,13 +38,11 @@ Tree* from_dist_asc_list(Slice xs)
     Slice rs = xs;
 
     // Ignore the middle element.
-    ls.end = root_ix-1;
-    rs.beg = root_ix+1;
+    ls.end = xs.beg+root_ix-1;
+    rs.beg = xs.beg+root_ix+1;
 
-    // Sizes are deltas from root_ix / slices size.
-    size_t offset_middle = xs.beg + root_ix;
-    ls.size = offset_middle - ls.beg;
-    rs.size = xs.size - rs.beg;
+    ls.size = (ls.beg <= ls.end) ? ls.end - ls.beg + 1 : 0;
+    rs.size = (rs.beg <= rs.end) ? rs.end - rs.beg + 1 : 0;
 
     root->left = from_dist_asc_list(ls);
     root->right = from_dist_asc_list(rs);
@@ -83,10 +85,37 @@ List to_list(Tree* t)
     .size = 0,
     .beg = 0,
     .end = size-1,
-    //.capacity = size,
+    .capacity = size,
   };
   to_list_go(t, &xs);
   return xs;
+}
+
+char* list_to_str(List xs, char virt_arr)
+{
+  if (xs.capacity == 0)
+  {
+    return NULL;
+  }
+
+  size_t sz = 4096;
+  size_t len = 0;
+  char* str = malloc(sz);
+
+  size_t beg = virt_arr ? xs.beg : 0;
+  size_t end = virt_arr ? xs.end+1 : xs.capacity;
+
+  len += sprintf(str, "[");
+  for (size_t i = beg; i < end; ++i)
+  {
+    len += sprintf(str + len, "%d", *(xs.arr+i));
+    if (i+1 != end)
+    {
+      len += sprintf(str + len, ", ");
+    }
+  }
+  len += sprintf(str + len, "]");
+  return str;
 }
 
 void print_list(List xs)
@@ -96,16 +125,29 @@ void print_list(List xs)
     return;
   }
 
-  printf("[");
-  for (size_t i = 0; i < xs.size; ++i)
-  {
-    printf("%d", *(xs.arr+i));
-    if (i+1 != xs.size)
-    {
-      printf(", ");
-    }
+  char* arr_str = list_to_str(xs, TRUE);
+  printf("%s\n", arr_str);
+  free(arr_str);
+}
+
+void debug_slice(Slice* xs)
+{
+  if (xs == NULL) {
+    return;
   }
-  printf("]\n");
+
+  char* arr_str = list_to_str(*xs, FALSE);
+  char* virt_arr_str = list_to_str(*xs, TRUE);
+  printf("Slice {\n");
+  printf("  arr: %s,\n", arr_str);
+  printf("  (virt. arr): %s,\n", virt_arr_str);
+  printf("  beg: %ld\n", xs->beg);
+  printf("  end: %ld\n", xs->end);
+  printf("  size: %ld\n", xs->size);
+  printf("  capacity: %ld\n", xs->capacity);
+  printf("}\n");
+  free(arr_str);
+  free(virt_arr_str);
 }
 
 // TODO do in order conversion to list.

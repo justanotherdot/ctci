@@ -9,12 +9,13 @@
 #define TRUE 1
 
 Tree* example_tree() {
-  int arr01[] = { 1, 2, 3, 4, 5, 6, 7 };
+  int arr01[] = { 1, 2, 3, 4, 5, 6, 7, 8 };
   Slice s01 = {
     .arr = arr01,
     .beg = 0,
-    .end = 6,
-    .size = 7,
+    .end = 7,
+    .size = 8,
+    .capacity = 8,
   };
   return from_dist_asc_list(s01);
 }
@@ -259,12 +260,13 @@ void tree_to_lists(Tree* t)
 int main(void)
 {
   Tree* t = example_tree();
+  print_tree(t);
+  printf("\n");
 
-  // FIXME I believe to_list to be broken.
   List xs = to_list(t);
   print_list(xs);
 
-  tree_to_lists(t);
+  /*tree_to_lists(t);*/
 
   free_tree(t);
   free_list(xs);

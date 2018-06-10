@@ -17,11 +17,11 @@ struct slice_t
 {
   int* arr;
 
-  size_t beg;
+  size_t beg; // Inclusive.
   size_t end;
 
-  size_t size;
-  //size_t capacity; // unused, but normally slices would have this.
+  size_t size; // Current size.
+  size_t capacity;
 };
 
 Tree* singleton(size_t val);
@@ -41,5 +41,7 @@ void print_tree(Tree* t);
 void free_tree(Tree* t);
 
 void free_list(List xs);
+
+void debug_slice(Slice* xs);
 
 #endif
