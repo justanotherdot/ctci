@@ -7,6 +7,9 @@
 #define TRUE 1
 #define FALSE 0
 
+#define MIN(a,b) ((a<b)?a:b)
+#define MAX(a,b) ((a<b)?b:a)
+
 Tree* singleton(size_t val)
 {
   Tree* t = malloc(sizeof(Tree));
@@ -63,8 +66,16 @@ size_t tree_size(Tree* t)
   return size+1;
 }
 
-// FIXME this won't work. The ixes aren't in the correct places for them to lay
-// out properly.
+int tree_height(Tree* t)
+{
+  if (t == NULL)
+  {
+    return -1;
+  }
+
+  return 1 + MAX(tree_height(t->left), tree_height(t->right));
+}
+
 void to_list_go(Tree* t, List* xs)
 {
   if (t == NULL)

@@ -23,44 +23,48 @@ Tree* example_tree() {
 // START INTEGER QUEUE
 
 // A dyanmically sized integer queue.
-struct int_queue_t {
+struct queue_t {
   void** arr;
   size_t size;
   size_t capacity;
   size_t front;
   size_t back; // as `size' != `back'
 };
-typedef struct int_queue_t IntQueue;
+typedef struct queue_t Queue;
 
-IntQueue empty_int_queue()
+Queue* empty_queue()
 {
-  IntQueue iq = {
-    .arr = NULL,
-    .size = 0,
-    .capacity = 0,
-    .front = 0,
-    .back = 0,
-  };
+  Queue* iq = malloc(sizeof(Queue));
+  iq->arr = NULL;
+  iq->size = 0;
+  iq->capacity = 0;
+  iq->front = 0;
+  iq->back = 0;
   return iq;
 }
 
 // XXX TMP
-void print_int_queue(IntQueue* iq);
+void print_queue(Queue* iq);
+void debug_queue(Queue* iq);
 
-void resize_int_queue(IntQueue* iq, size_t new_size)
+void resize_queue(Queue* iq, size_t new_size)
 {
   assert(new_size > 0);
 
   if (iq->arr != NULL) {
-    // XXX Could also malloc and memcpy.
-    void** tmp = iq->arr;
-    iq->arr = realloc(iq->arr, sizeof(void*) * new_size);
+    void** old = iq->arr;
+    iq->arr = malloc(sizeof(void*) * new_size);
+    assert(iq->arr != NULL);
 
-    if (iq->arr == NULL) {
-      fprintf(stderr, "WARNING: Failed realloc in `resize_int_queue'\n");
-      iq->arr = tmp;
+    size_t j = 0;
+    for (size_t i = iq->front; i < iq->back; ++i) {
+      iq->arr[j] = old[i];
+      j += 1;
     }
+
+    free(old);
   } else {
+    // Init.
     iq->arr = malloc(sizeof(void*) * new_size);
     assert(iq->arr != NULL);
   }
@@ -68,19 +72,19 @@ void resize_int_queue(IntQueue* iq, size_t new_size)
 }
 
 // Assumes you will grow before enqueuing.
-void grow_int_queue(IntQueue* iq)
+void grow_queue(Queue* iq)
 {
   if (iq->arr == NULL) {
     // Init. queue if we're fresh.
-    resize_int_queue(iq, 1);
+    resize_queue(iq, 1);
   } else if ((iq->size+1) >= iq->capacity) {
     // Double queue if we're about to hit cap.
-    resize_int_queue(iq, iq->capacity*2);
+    resize_queue(iq, iq->capacity*2);
   }
 }
 
 // Assumes you will shrink after dequeuing.
-void shrink_int_queue(IntQueue* iq)
+void shrink_queue(Queue* iq)
 {
   if (iq == NULL) {
     return;
@@ -99,9 +103,9 @@ void shrink_int_queue(IntQueue* iq)
     void** old = iq->arr;
     size_t sz = iq->back - iq->front;
     iq->arr = malloc(sizeof(void*) * sz);
-    size_t j = iq->front;
-    for (size_t i = 0; i < iq->back; ++i, ++j) {
-      iq->arr[i] = old[j];
+    size_t j = 0;
+    for (size_t i = iq->front; i < iq->back; ++i, ++j) {
+      iq->arr[j] = old[i];
     }
     iq->capacity = iq->size;
     iq->front = 0;
@@ -111,9 +115,9 @@ void shrink_int_queue(IntQueue* iq)
   }
 }
 
-void enqueue_int(void* v, IntQueue* iq)
+void enqueue(void* v, Queue* iq)
 {
-  grow_int_queue(iq);
+  grow_queue(iq);
   iq->arr[iq->back] = v;
   iq->size += 1;
   if (iq->size > 0) {
@@ -121,7 +125,7 @@ void enqueue_int(void* v, IntQueue* iq)
   }
 }
 
-void* dequeue_int(IntQueue* iq)
+void* dequeue(Queue* iq)
 {
   assert(iq != NULL);
   assert(iq->arr != NULL);
@@ -134,19 +138,20 @@ void* dequeue_int(IntQueue* iq)
   iq->front += 1;
   iq->size -= 1;
 
-  shrink_int_queue(iq);
+  shrink_queue(iq);
   return rv;
 }
 
-void free_int_queue(IntQueue* iq)
+void free_queue(Queue* iq)
 {
   if (iq != NULL && iq->arr != NULL) {
     free(iq->arr);
   }
+  free(iq);
 }
 
-char* int_queue_array_to_string(IntQueue* iq, char debug) {
-  if (iq == NULL || iq->size == 0) {
+char* queue_array_to_string(Queue* iq, char debug) {
+  if (iq == NULL || iq->capacity == 0) {
     return NULL;
   }
 
@@ -164,8 +169,7 @@ char* int_queue_array_to_string(IntQueue* iq, char debug) {
     }
 
     if (i >= iq->front && i < iq->back) {
-      /*sl += sprintf(str + sl, "%d", iq->arr[i]);*/
-      sl += sprintf(str + sl, "OBJECT");
+      sl += sprintf(str + sl, "%p", iq->arr[i]);
     } else {
       sl += sprintf(str + sl, "X");
     }
@@ -181,21 +185,21 @@ char* int_queue_array_to_string(IntQueue* iq, char debug) {
   return str;
 }
 
-void print_int_queue(IntQueue* iq)
+void print_queue(Queue* iq)
 {
   if (iq == NULL) {
     return;
   }
 
-  char* str = int_queue_array_to_string(iq, FALSE);
+  char* str = queue_array_to_string(iq, FALSE);
   printf("%s\n", str);
   free(str);
 }
 
-void debug_int_queue(IntQueue* iq)
+void debug_queue(Queue* iq)
 {
-  char* arr_str = int_queue_array_to_string(iq, TRUE);
-  printf("IntQueue {\n");
+  char* arr_str = queue_array_to_string(iq, TRUE);
+  printf("Queue {\n");
   printf("  arr: %s,\n", arr_str);
   printf("  size: %ld\n", iq->size);
   printf("  capacity: %ld\n", iq->capacity);
@@ -205,12 +209,12 @@ void debug_int_queue(IntQueue* iq)
   free(arr_str);
 }
 
-char is_empty_int_queue(IntQueue* iq)
+char is_empty_queue(Queue* iq)
 {
   return iq->arr == NULL;
 }
 
-char is_member_of_int_queue(void* needle, IntQueue* iq)
+char is_member_of_queue(void* needle, Queue* iq)
 {
   char rv = FALSE;
   for (size_t i = iq->front; i < iq->back; ++i) {
@@ -219,6 +223,24 @@ char is_member_of_int_queue(void* needle, IntQueue* iq)
     }
   }
   return rv;
+}
+
+struct depth_node_t {
+  void* node;
+  size_t depth;
+};
+typedef struct depth_node_t DepthNode;
+
+DepthNode* singleton_dn(void* node, size_t depth)
+{
+  DepthNode* dn = malloc(sizeof(DepthNode));
+  dn->node = node;
+  dn->depth = depth;
+  return dn;
+}
+void free_dn(DepthNode* dn)
+{
+  free(dn);
 }
 
 // END INTEGER QUEUE
@@ -230,44 +252,71 @@ char is_member_of_int_queue(void* needle, IntQueue* iq)
 // This also has a serious flow in that it assumes that all items of the tree
 // are unique, which should technically be true but may not be if the tree is
 // malformed.
-// FIXME Needs a queue that can queue up tree nodes.
-void tree_to_lists(Tree* t)
+Queue** tree_to_lists(Tree* t)
 {
   if (t == NULL) {
-    return;
+    return NULL;
   }
 
-  IntQueue seen = empty_int_queue();
-  IntQueue q = empty_int_queue();
-  enqueue_int(t, &q);
+  Queue* seen = empty_queue();
+  Queue* q = empty_queue();
+  enqueue(singleton_dn(t, 0), q);
 
-  while (!is_empty_int_queue(&q)) {
-    Tree* curr = dequeue_int(&q);
-    if (curr == NULL || is_member_of_int_queue(curr, &seen)) {
+  int num_lists = tree_height(t) + 1;
+
+  // ptr to queues
+  // Law: each layer must have as many items as it's (index+1).
+  Queue** layers = malloc(num_lists * sizeof(Queue*));
+  for (int i = 0; i < num_lists; ++i) {
+    layers[i] = empty_queue();
+  }
+
+  while (!is_empty_queue(q)) {
+    DepthNode* curr_dn = dequeue(q);
+    Tree* curr = curr_dn->node;
+    if (curr == NULL || is_member_of_queue(curr_dn, seen)) {
       continue;
     }
-    printf("%ld\n", curr->val);
-    enqueue_int(curr, &seen);
+
+    enqueue(curr_dn, layers[curr_dn->depth]);
+
+    enqueue(curr_dn, seen);
     if (curr->left != NULL) {
-      enqueue_int(curr->left, &q);
+      enqueue(singleton_dn(curr->left, curr_dn->depth+1), q);
     }
     if (curr->right != NULL) {
-      enqueue_int(curr->right, &q);
+      enqueue(singleton_dn(curr->right, curr_dn->depth+1), q);
     }
   }
+
+  free_queue(q);
+  free_queue(seen);
+
+  return layers;
 }
 
 int main(void)
 {
   Tree* t = example_tree();
-  print_tree(t);
-  printf("\n");
 
   List xs = to_list(t);
   print_list(xs);
 
-  /*tree_to_lists(t);*/
+  Queue** layers = tree_to_lists(t);
+
+  for (size_t i = 0; i < (size_t)tree_height(t) + 1; ++i) {
+    Queue* q = layers[i];
+    while (!is_empty_queue(q)) {
+      DepthNode* x = dequeue(q);
+      Tree* y = x->node;
+      printf("Queue at depth %ld stored the value %ld\n", x->depth, y->val);
+
+      free_dn(x);
+    }
+    free_queue(q);
+  }
 
   free_tree(t);
   free_list(xs);
+  free(layers);
 }

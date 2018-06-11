@@ -30,6 +30,8 @@ Tree* from_dist_asc_list(Slice xs);
 
 size_t tree_size(Tree* t);
 
+int tree_height(Tree* t);
+
 void to_list_go(Tree* t, List* xs);
 
 List to_list(Tree* t);
