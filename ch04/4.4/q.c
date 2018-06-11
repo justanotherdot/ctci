@@ -6,20 +6,33 @@
 #include <stdbool.h>
 #include "../common/tree.h"
 
-Tree* example_tree() {
-  int arr01[] = { 1, 2, 3, 4, 5, 6, 7, 8 };
-  Slice s01 = {
-    .arr = arr01,
+Tree* example_tree_gen(int n)
+{
+  if (n < 1) {
+    return NULL;
+  }
+
+  int* arr = malloc(sizeof(int) * n);
+  for (int i = 1; i <= n; ++i) {
+    arr[i-1] = i;
+  }
+
+  Slice slc = {
+    .arr = arr,
     .beg = 0,
-    .end = 7,
-    .size = 8,
-    .capacity = 8,
+    .end = n-1,
+    .size = n,
+    .capacity = n,
   };
-  return from_dist_asc_list(s01);
+
+  Tree* p = from_dist_asc_list(slc);
+  free(arr);
+  return p;
 }
 
 // A tree `t' is balanced iff no sub-trees differ in height by more than one.
-bool is_balanced(Tree* t) {
+bool is_balanced(Tree* t)
+{
   if (t == NULL) {
     return true;
   }
@@ -38,22 +51,43 @@ bool is_balanced(Tree* t) {
 
 int main(void)
 {
-  Tree* t = example_tree();
+  Tree* t = example_tree_gen(8);
 
+  // Add to it in a balanced way (next avail. slot).
   Tree* curr = NULL;
+  Tree* tmp  = NULL;
   curr = t;
-  while (curr->left != NULL && curr->left->val != 2) {
+  while (curr->left != NULL && curr->val != 2) {
     curr = curr->left;
   }
-  curr->right = singleton(42);
+  tmp = singleton(42);
+  curr->right = tmp;
   assert(is_balanced(t) == true);
+  free(tmp);
+  tmp = NULL;
+  curr->right = NULL;
 
+  // Make it lop-sided to the left.
   curr = t;
   while (curr->left != NULL) {
     curr = curr->left;
   }
-  curr->left = singleton(42);
+  tmp = singleton(42);
+  curr->left = tmp;
   assert(is_balanced(t) == false);
+  free(tmp);
+  tmp = NULL;
+  curr->left = NULL;
 
   free_tree(t);
+  t = NULL;
+
+  // Verify `from_dist_asc_list'
+  int ul = 100;
+  for (int i = 0; i < ul; ++i) {
+    Tree* k = example_tree_gen(i);
+    assert(is_balanced(k) == true);
+    free_tree(k);
+  }
+
 }

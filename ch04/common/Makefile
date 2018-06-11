@@ -1,2 +1,2 @@
 all: tree.c
-	clang -Wall -Werror -O2 -c tree.c
+	clang -g -Wall -Werror -O2 -c tree.c
