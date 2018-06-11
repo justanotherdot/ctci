@@ -280,6 +280,9 @@ Queue** tree_to_lists(Tree* t)
 
     enqueue(curr_dn, layers[curr_dn->depth]);
 
+    double ul = pow(2, curr_dn->depth+1);
+    assert(layers[curr_dn->depth]->size <= ul);
+
     enqueue(curr_dn, seen);
     if (curr->left != NULL) {
       enqueue(singleton_dn(curr->left, curr_dn->depth+1), q);
